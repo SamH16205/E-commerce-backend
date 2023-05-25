@@ -41,30 +41,36 @@ router.post('/', (req, res) => {
     .then((tag) => {
       // if there's product tags, we need to create pairings to bulk create in the ProductTag model
       if (req.body.products.length) {
-        const productIdArr = req.body.product.map((product_id) => {
+        const productIdArr = req.body.products.map((product_id) => {
           return {
             tag_id: tag.id,
-            product_id,
+            product_id
           };
         });
-        return Product.bulkCreate(productIdArr);
+        return ProductTag.bulkCreate(productIdArr);
       }
       // if no product tags, just respond
-      res.status(200).json(product);
+      res.status(200).json(tag);
     })
-    .then((productIds) => res.status(200).json(productIds))
+    .then((tagIds) => res.status(200).json(tagIds))
     .catch((err) => {
       console.log(err);
       res.status(400).json(err);
     });
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   // update a tag's name by its `id` value
-});
+  const tag = await Tag.findByPk(req.params.id)
+  await tag.update({tag_name:req.body.tag_name})
+  await res.json(tag)
+})
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   // delete on tag by its `id` value
+  const tag = await Tag.findByPk(req.params.id)
+  await tag.destroy()
+  await res.send(`${tag.tag_name} tag destroyed`)
 });
 
 module.exports = router;
